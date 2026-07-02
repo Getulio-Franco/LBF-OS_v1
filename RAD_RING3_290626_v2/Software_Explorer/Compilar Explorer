@@ -1,0 +1,53 @@
+
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -c explorer.c -o explorer.o
+
+
+ld -m elf_x86_64 -T user.ld -static -no-pie \
+    ../system/crt0.o \
+    ../system/string.o \
+    ../system/malloc.o \
+    ../system/fonts.o \
+    ../system/graphics.o \
+    ../events/input_events.o \
+    ../events/cursor_engine.o \
+    ../gui/gui.o \
+    ../gui/wm.o \
+    ../gui/z_order.o \
+    ../gui/gui_interaction.o \
+    explorer.o \
+    -o explorer.elf
+    
+   
+readelf -h explorer.elf
+
+readelf -l explorer.elf
+
+
+Verificar a data do arquivo:
+ls -l stdiot.elf (Veja se o horário bate com o de agora).
+
+Verificar se as funções estão lá:
+nm explorer.elf | grep -E "printf|vsprintf|malloc"
+
+Verificar o tamanho do arquivo:
+du -h explorer.elf
+
+VALIDA A MEMORIA
+readelf -S explorer.elf
+
+objdump -d explorer.elf | grep xmm
+
+mcopy -o -i disco_sata.img explorer.elf ::/
+
+objdump -d explorer.elf | head -n 20
+
+----- esse verifica a memoria onde o erro acontecu
+
+readelf -S explorer.elf
+
+objdump -d explorer.elf | grep -B 20 "404ecf"
+
+objdump -d explorer.elf | grep -B 20 "40580e"
+
+
+

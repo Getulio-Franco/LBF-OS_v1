@@ -1,0 +1,94 @@
+# 1. Sistema e Runtime (A base do executável)
+
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -c system/crt0.c -o system/crt0.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c system/string.c -o system/string.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c system/malloc.c -o system/malloc.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c system/graphics.c -o system/graphics.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c system/fonts.c -o system/fonts.o
+
+-------------Eventos inicio--------------------------
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c events/cursor_engine.c -o events/cursor_engine.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c events/input_events.c -o events/input_events.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c events/mouse_geometry.c -o events/mouse_geometry.o
+-------------Eventos fim-----------------------------
+
+-------------Complemento gui-------------------------
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c gui/gui_interaction.c -o gui/gui_interaction.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c gui/window_drag.c -o gui/window_drag.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c gui/z_order.c -o gui/z_order.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c gui/wm.c -o gui/wm.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -I. -c gui/gui.c -o gui/gui.o
+
+# 2. Biblioteca Visual e RAD (Note que adicionei -fno-pie aqui também)
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/libgui.c -o Runtime_sdk/sdk/libgui.o
+
+COMPONENTES 
+
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/libgui.c -o Runtime_sdk/sdk/libgui.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TButton.c -o Runtime_sdk/sdk/TButton.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TLabel.c -o Runtime_sdk/sdk/TLabel.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TEdit.c -o Runtime_sdk/sdk/TEdit.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TMemo.c -o Runtime_sdk/sdk/TMemo.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TComboBox.c -o Runtime_sdk/sdk/TComboBox.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TCheckBox.c -o Runtime_sdk/sdk/TCheckBox.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TRadioButton.c -o Runtime_sdk/sdk/TRadioButton.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TImage.c -o Runtime_sdk/sdk/TImage.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TForm.c -o Runtime_sdk/sdk/TForm.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TPanel.c -o Runtime_sdk/sdk/TPanel.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TScrollBar.c -o Runtime_sdk/sdk/TScrollBar.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/sdk/TListView.c -o Runtime_sdk/sdk/TListView.o
+
+SERIAL E IPC
+
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/components/TOSSerial.c -o Runtime_sdk/components/TOSSerial.o
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/components/TOS_IPC.c -o Runtime_sdk/components/TOS_IPC.o
+
+
+# Usamos o LD (Linker) diretamente para ter controle total
+
+ld -m elf_x86_64 -T user.ld -static -o tarefa.elf \
+    system/crt0.o \
+    Runtime_sdk/tarefa.o \
+    Runtime_sdk/sdk/libgui.o \
+    Runtime_sdk/sdk/TScrollBar.o \
+    Runtime_sdk/sdk/TListView.o \
+    Runtime_sdk/sdk/TComboBox.o \
+    Runtime_sdk/sdk/TButton.o \
+    Runtime_sdk/sdk/TEdit.o \
+    Runtime_sdk/sdk/TMemo.o \
+    Runtime_sdk/sdk/TCheckBox.o \
+    Runtime_sdk/sdk/TRadioButton.o \
+    Runtime_sdk/sdk/TLabel.o \
+    gui/gui.o \
+    gui/wm.o \
+    gui/z_order.o \
+    gui/gui_interaction.o \
+    system/graphics.o \
+    system/fonts.o \
+    system/string.o \
+    events/input_events.o \
+    Runtime/components/TOS_IPC.o \
+    Runtime/components/TOSSerial.o \
+    system/malloc.o
+
+mcopy -o -i disk_gemini.img ida.elf ::/
+
+Verificar a data do arquivo:
+ls -l stdiot.elf (Veja se o horário bate com o de agora).
+
+Verificar se as funções estão lá:
+nm test.elf | grep -E "printf|vsprintf|malloc"
+
+Verificar o tamanho do arquivo:
+du -h test.elf
+
+VALIDA A MEMORIA
+readelf -S test.elf
+
+objdump -d test.elf | grep xmm
+
+mcopy -o -i disk_gemini.img test.elf ::/
+
+objdump -d test.elf | head -n 20
+
+

@@ -1,0 +1,53 @@
+gcc -m64 -ffreestanding -fno-stack-protector -fno-pie -Isystem -I. -c Runtime_sdk/temp.c -o Runtime_sdk/tamp.o
+
+# Usamos o LD (Linker) diretamente para ter controle total
+
+ld -m elf_x86_64 -T user.ld -static -o tamp.elf \
+    system/crt0.o \
+    Runtime_sdk/tamp.o \
+    Runtime_sdk/sdk/libgui.o \
+    Runtime_sdk/sdk/TScrollBar.o \
+    Runtime_sdk/sdk/TListView.o \
+    Runtime_sdk/sdk/TComboBox.o \
+    Runtime_sdk/sdk/TButton.o \
+    Runtime_sdk/sdk/TEdit.o \
+    Runtime_sdk/sdk/TMemo.o \
+    Runtime_sdk/sdk/TCheckBox.o \
+    Runtime_sdk/sdk/TRadioButton.o \
+    Runtime_sdk/sdk/TLabel.o \
+    gui/gui.o \
+    gui/wm.o \
+    gui/z_order.o \
+    gui/gui_interaction.o \
+    system/graphics.o \
+    system/fonts.o \
+    system/string.o \
+    events/input_events.o \
+    Runtime_sdk/components/TOS_IPC.o \
+    Runtime_sdk/components/TOSSerial.o \
+    system/malloc.o
+
+
+mcopy -o -i disco_sata.img tamp.elf ::/
+
+Verificar a data do arquivo:
+ls -l tarefa.elf (Veja se o horário bate com o de agora).
+
+Verificar se as funções estão lá:
+nm temp.elf | grep -E "printf|vsprintf|malloc"
+
+Verificar o tamanho do arquivo:
+du -h temp.elf
+
+VALIDA A MEMORIA
+readelf -S temp.elf
+
+readelf -h temp.elf
+
+objdump -d temp.elf | grep xmm
+
+mcopy -o -i disco_sata.img tamp.elf ::/
+
+objdump -d temp.elf | head -n 20
+
+
